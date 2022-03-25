@@ -1,3 +1,7 @@
+-- CREATE USER 'restfx'@'localhost' IDENTIFIED BY 'q@lUH@2.*QMF6xOa';
+-- GRANT ALL PRIVILEGES ON *.* TO 'restfx'@'localhost';
+-- FLUSH PRIVILEGES;
+
 DROP DATABASE IF EXISTS `restfx`;
 CREATE DATABASE `restfx` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
 
