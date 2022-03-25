@@ -13,7 +13,7 @@ ENGINE = InnoDB;
 
 DROP TABLE IF EXISTS `restfx`.`subject`;
 CREATE TABLE IF NOT EXISTS `restfx`.`subject` (
-  `id` VARCHAR(255),
+  `id` VARCHAR(191),
   `created_at` DATETIME NULL,
   `updated_at` DATETIME NULL,
   PRIMARY KEY (`id`))
