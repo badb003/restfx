@@ -48,6 +48,6 @@ $router->group([
 });
 
 $router->get('/', function () use ($router) {
-    return view('welcome');
+    return '!!!';
 });
 
