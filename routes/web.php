@@ -41,6 +41,9 @@ $router->group([
 
     // select / get value
     $router->get('page', 'SelectionController@getPage');
+
+    // template page
+    $router->get('page', 'SelectionController@templatePage');
     
     // user out
     $router->get('me', 'AuthController@me');

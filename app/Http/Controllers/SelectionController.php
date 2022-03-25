@@ -14,6 +14,11 @@ class SelectionController extends Controller
         $this->middleware('auth:api', ['except' => []]);
     }
 
+    public function templatePage(Request $request) {
+        $res = DB::table('competence')->get();
+        return response()->json($res);
+    }
+
     public function get(Request $request) {
         $subject_fk = $request->input('subject_fk');
         $profile_fk = $request->input('profile_fk');
