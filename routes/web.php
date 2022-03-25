@@ -43,7 +43,7 @@ $router->group([
     $router->get('page', 'SelectionController@getPage');
 
     // template page
-    $router->get('page', 'SelectionController@templatePage');
+    $router->get('templatepage', 'SelectionController@templatePage');
     
     // user out
     $router->get('me', 'AuthController@me');
