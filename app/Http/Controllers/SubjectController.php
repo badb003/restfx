@@ -20,8 +20,19 @@ class SubjectController extends Controller
     
     public function create(Request $request) {
         $id = $request->input('id');
+        
+        if (!$id) {
+            return response()->json(['error' => 'Missing id in request']);
+        }
+
+        $exists = DB::table('subject')->where('id', '=', $id)->first();
+        
+        if ($exists) {
+            return response()->json(['error' => 'That id is already in use']);
+        }
+
         Subject::create(['id'=>$id]);
-        return response()->json(['message' => 'Successfully created subject']);
+        return response()->json(['message' =>'Successfully created subject']);
     }
 
     public function delete(Request $request) {

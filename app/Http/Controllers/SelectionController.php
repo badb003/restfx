@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Models\Selection;
-use App\Models\Competence;
 
 class SelectionController extends Controller
 {
@@ -23,7 +22,24 @@ class SelectionController extends Controller
         $subject_fk = $request->input('subject_fk');
         $profile_fk = $request->input('profile_fk');
         $competence_fk = $request->input('competence_fk');
-        $selection = Selection::where('subject_fk', '=', $subject_fk)->where('profile_fk' ,'=', $profile_fk)->where('competence_fk' ,'=', $competence_fk)->get();
+
+        if (!$subject_fk) {
+            return response()->json(['error' => 'missing subject_fk']);
+        }
+
+        if (!$profile_fk) {
+            return response()->json(['error' => 'missing profile_fk']);
+        }
+
+        if (!$competence_fk) {
+            return response()->json(['error' => 'missing competence_fk']);
+        }
+
+        $selection = Selection::where('subject_fk', '=', $subject_fk)
+                                ->where('profile_fk' ,'=', $profile_fk)
+                                ->where('competence_fk' ,'=', $competence_fk)
+                                ->get();
+
         return response()->json($selection);
     }
 
@@ -31,6 +47,18 @@ class SelectionController extends Controller
         $subject_fk = $request->input('subject_fk');
         $profile_fk = $request->input('profile_fk');
         $page = $request->input('page');
+
+        if (!$subject_fk) {
+            return response()->json(['error' => 'missing subject_fk']);
+        }
+
+        if (!$profile_fk) {
+            return response()->json(['error' => 'missing profile_fk']);
+        }
+
+        if (!$page) {
+            return response()->json(['error' => 'missing page']);
+        }
 
         $res = DB::table('selection')
             ->leftJoin('competence', 'competence.id', '=', 'selection.competence_fk')
@@ -48,16 +76,41 @@ class SelectionController extends Controller
         $competence_fk = $request->input('competence_fk');
         $value = $request->input('value');
 
-        $exists = Selection::where('subject_fk', '=', $subject_fk)->where('profile_fk' ,'=', $profile_fk)->where('competence_fk' ,'=', $competence_fk)->get();
+        if (!$subject_fk) {
+            return response()->json(['error' => 'missing subject_fk']);
+        }
+
+        if (!$profile_fk) {
+            return response()->json(['error' => 'missing profile_fk']);
+        }
+
+        if (!$competence_fk) {
+            return response()->json(['error' => 'missing competence_fk']);
+        }
+
+        if (!is_numeric($value)) {
+            return response()->json(['error' => 'missing value']);
+        }
+
+        $exists = Selection::where('subject_fk', '=', $subject_fk)
+                            ->where('profile_fk' ,'=', $profile_fk)
+                            ->where('competence_fk' ,'=', $competence_fk)
+                            ->get();
 
         if (count($exists) == 0) {
             Selection::create(['subject_fk'=>$subject_fk, 'profile_fk'=>$profile_fk, 'competence_fk'=>$competence_fk,  'value'=>$value ]);
         }
         else {
-            Selection::where('subject_fk' ,'=', $subject_fk)->where('profile_fk' ,'=', $profile_fk)->where('competence_fk' ,'=', $competence_fk)->update(['value' => $value]);
+            Selection::where('subject_fk' ,'=', $subject_fk)
+                    ->where('profile_fk' ,'=', $profile_fk)
+                    ->where('competence_fk' ,'=', $competence_fk)
+                    ->update(['value' => $value]);
         }
 
-        $new = Selection::where('subject_fk', '=', $subject_fk)->where('profile_fk' ,'=', $profile_fk)->where('competence_fk' ,'=', $competence_fk)->get();
+        $new = Selection::where('subject_fk', '=', $subject_fk)
+                        ->where('profile_fk' ,'=', $profile_fk)
+                        ->where('competence_fk' ,'=', $competence_fk)
+                        ->get();
 
         return response()->json(['selection' => $new]);
     }
