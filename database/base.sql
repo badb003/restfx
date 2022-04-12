@@ -9,6 +9,7 @@ DROP TABLE IF EXISTS `restfx`.`users`;
 CREATE TABLE IF NOT EXISTS `restfx`.`users` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NULL,
+  `admin` TINYINT NULL,
   `password` VARCHAR(255) NULL,
   `created_at` DATETIME NULL,
   `updated_at` DATETIME NULL,

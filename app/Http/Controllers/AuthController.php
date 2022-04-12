@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
@@ -23,13 +24,21 @@ class AuthController extends Controller
     public function register (Request $request) {
         $this->validate($request, [
             'name' => 'required',
-            'password' => 'required'
+            'password' => 'required',
+            'admin' => 'required'
         ]);
 
         $name = $request->input('name');
         $password = Hash::make($request->input('password'));
+        $admin = $request->input('admin');
 
-        User::create(['name'=>$name, 'password'=>$password]);
+        $exists = DB::table('users')->where('name', '=', $name)->first();
+
+        if ($exists) {
+            return response()->json(['error' => 'That user already exists']);
+        }
+
+        User::create(['name'=>$name, 'password'=>$password, 'admin' => $admin]);
 
         return response()->json(['message' => 'Successfully created user']);
     }
@@ -84,6 +93,7 @@ class AuthController extends Controller
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
+            'admin' =>  auth()->user()['admin'],
             'expires_in' => auth()->factory()->getTTL() * 60
         ]);
     }
