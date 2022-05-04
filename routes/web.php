@@ -45,6 +45,9 @@ $router->group([
     // template page
     $router->get('templatepage', 'SelectionController@templatePage');
     
+    // languate createOrUpdate
+    $router->post('editlanguage', 'SelectionController@createOrUpdateLang');
+
     // user out
     $router->get('me', 'AuthController@me');
     $router->post('logout', 'AuthController@logout');

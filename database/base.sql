@@ -57,6 +57,15 @@ CREATE TABLE IF NOT EXISTS `restfx`.`selection` (
   PRIMARY KEY (`subject_fk`, `profile_fk`, `competence_fk`))
 ENGINE = InnoDB;
 
+DROP TABLE IF EXISTS `restfx`.`language`;
+CREATE TABLE IF NOT EXISTS `restfx`.`language` (
+  `id` INT NULL,
+  `lang` VARCHAR(20),
+  `name` VARCHAR(256) NULL,
+  `updated_at` DATETIME NULL,
+  `created_at` DATETIME NULL,
+  PRIMARY KEY (`id`, `lang`))
+ENGINE = InnoDB;
 
 
 INSERT INTO `restfx`.`competence`(`name`, `page`, `xpos`, `ypos`) VALUES ('Ability to act/execute','2','3','2');
