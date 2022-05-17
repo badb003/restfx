@@ -253,6 +253,15 @@ class SelectionController extends Controller
 
             $counter++;
         }
-        return response()->json( $data);
+
+        $rdata = [];
+
+        foreach($data as $x) {
+            $id =  explode('!', $x)[0];
+            $profile =  explode('!', $x)[1];
+            array_push($rdata, ['subject_fk'=>$id, 'profile_fk'=>$profile]);
+        }
+
+        return response()->json($rdata);
     }
 }
