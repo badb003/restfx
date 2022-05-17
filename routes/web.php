@@ -41,6 +41,10 @@ $router->group([
 
     // select / get value
     $router->get('page', 'SelectionController@getPage');
+    $router->get('allselected', 'SelectionController@getAllPages');
+
+    $router->post('filter', 'SelectionController@filter');
+    
 
     // template page
     $router->get('templatepage', 'SelectionController@templatePage');

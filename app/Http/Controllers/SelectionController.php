@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Models\Selection;
 use App\Models\Language;
+use App\Models\Profile;
+use PhpParser\Node\Stmt\Throw_;
 
 class SelectionController extends Controller
 {
@@ -75,6 +77,28 @@ class SelectionController extends Controller
             ->where('profile_fk', '=', $profile_fk)
             ->where('page', '=', $page)
             ->get();
+
+        return response()->json($res);
+    }
+
+    public function getAllPages(Request $request) {
+        $subject_fk = $request->input('subject_fk');
+
+        if (!$subject_fk) {
+            return response()->json(['error' => 'missing subject_fk']);
+        }
+
+        $profiles = Profile::all();
+
+        $res = [];
+
+        foreach ($profiles as $profile) {
+            $res[$profile->name] = DB::table('selection')
+            ->leftJoin('competence', 'competence.id', '=', 'selection.competence_fk')
+            ->where('subject_fk', '=', $subject_fk)
+            ->where('profile_fk', '=', $profile->id)
+            ->get();
+        }
 
         return response()->json($res);
     }
@@ -167,4 +191,68 @@ class SelectionController extends Controller
         return response()->json(['selection' => $new]);
     }
 
+    public function filter(Request $request) {
+        $page = $request->input('filter');
+
+        try {
+            $filters = json_decode(json_decode($page, false));
+            if (!$filters) {
+                return response()->json(['format' => 'invalid json format']);
+            }
+        } catch (\Throwable $th) {
+            return response()->json(['format' => 'invalid json format']);
+        }
+
+
+        $counter = 0;
+        foreach ($filters as $filter) {
+            if (!isset($filter->min) && !isset($filter->ids)) {  return response()->json(['filter' => 'filter missing ids or min']); }
+
+            // query for ids
+            if (isset($filter->ids) && count($filter->ids) > 0) {
+                $sql = implode("OR selection.id = ", $filter->ids);
+                $select = DB::select(
+                    "SELECT `subject_fk`, `profile_fk`
+                     FROM `selection`
+                     LEFT JOIN `competence` ON `competence`.`id` = `selection`.`competence_fk`
+                     WHERE `page` = ? AND selection.value = 1 AND ({$sql})
+                     GROUP BY `subject_fk`, `profile_fk`, `page`
+                     ORDER BY `subject_fk`, `profile_fk`, `page`
+                     ",
+                    [ $filter->page ]
+                );
+            }
+            // query for min
+            else {
+                $select = DB::select(
+                    "SELECT `subject_fk`, `profile_fk`, sum(`selection`.`value`) as `totalSelected`
+                    FROM `selection`
+                    LEFT JOIN `competence` ON `competence`.`id` = `selection`.`competence_fk`
+                    WHERE `page` = ?
+                    GROUP BY `subject_fk`, `profile_fk`, `page`
+                    HAVING  sum(`selection`.`value`) >= ?
+                    ORDER BY `subject_fk`, `profile_fk`, `page`
+                    ",
+                    [ $filter->page, $filter->min ]
+                );
+            }
+
+            $xxx = [];
+
+            foreach ($select as $xs) {
+                array_push($xxx, $xs->subject_fk.'!'.$xs->profile_fk);
+            }
+
+            if ($counter == 0) {
+                $data = $xxx;
+            }
+
+            if ($counter > 0) {
+                array_intersect_assoc($data, $xxx);
+            }
+
+            $counter++;
+        }
+        return response()->json( $data);
+    }
 }
