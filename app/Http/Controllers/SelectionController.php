@@ -210,16 +210,23 @@ class SelectionController extends Controller
 
             // query for ids
             if (isset($filter->ids) && count($filter->ids) > 0) {
-                $sql = implode("OR selection.id = ", $filter->ids);
+                $sql = 'competence_fk =';
+
+                // foreach($filter->ids as $key) {
+                //     $sql .= " OR competence_fk =".$key;
+                // }
+
+                $sql .= implode(" OR competence_fk = ", $filter->ids);
+
+                // dd($sql);
                 $select = DB::select(
                     "SELECT `subject_fk`, `profile_fk`
                      FROM `selection`
                      LEFT JOIN `competence` ON `competence`.`id` = `selection`.`competence_fk`
-                     WHERE `page` = ? AND selection.value = 1 AND ({$sql})
-                     GROUP BY `subject_fk`, `profile_fk`, `page`
+                     WHERE `selection`.`value` = 1 AND ({$sql})
+                     GROUP BY `subject_fk`, `profile_fk`
                      ORDER BY `subject_fk`, `profile_fk`, `page`
-                     ",
-                    [ $filter->page ]
+                     "
                 );
             }
             // query for min
@@ -239,6 +246,7 @@ class SelectionController extends Controller
 
             $xxx = [];
 
+            // add ids list
             foreach ($select as $xs) {
                 array_push($xxx, $xs->subject_fk.'!'.$xs->profile_fk);
             }
@@ -248,7 +256,7 @@ class SelectionController extends Controller
             }
 
             if ($counter > 0) {
-                array_intersect_assoc($data, $xxx);
+                $data = array_intersect_assoc($data, $xxx);
             }
 
             $counter++;
@@ -259,7 +267,21 @@ class SelectionController extends Controller
         foreach($data as $x) {
             $id =  explode('!', $x)[0];
             $profile =  explode('!', $x)[1];
-            array_push($rdata, ['subject_fk'=>$id, 'profile_fk'=>$profile]);
+
+            $listIds = DB::select(
+                "SELECT `id`
+                 FROM `competence`
+                 LEFT JOIN selection ON selection.competence_fk = competence.id
+                 WHERE `value` = 1 AND `subject_fk` = ? AND `profile_fk` = ?
+                 ORDER BY `page`",
+                 [ $id, $profile ]
+             );
+             $idlist = [];
+             foreach ($listIds as $idl) {
+                 array_push($idlist, $idl->id);
+             }
+
+            array_push($rdata, ['subject_fk'=>$id, 'profile_fk'=>$profile, 'ids' => $idlist]);
         }
 
         return response()->json($rdata);
