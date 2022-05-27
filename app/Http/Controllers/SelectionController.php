@@ -207,27 +207,52 @@ class SelectionController extends Controller
         $counter = 0;
         foreach ($filters as $filter) {
             if (!isset($filter->min) && !isset($filter->ids)) {  return response()->json(['filter' => 'filter missing ids or min']); }
+            
+            $xxx = [];
+
+            if (isset($idf)) { unset($idf); }
 
             // query for ids
             if (isset($filter->ids) && count($filter->ids) > 0) {
-                $sql = 'competence_fk =';
+                // $sql = 'competence_fk = ';
 
-                // foreach($filter->ids as $key) {
-                //     $sql .= " OR competence_fk =".$key;
-                // }
+                // $sql .= implode(" OR competence_fk = ", $filter->ids);
 
-                $sql .= implode(" OR competence_fk = ", $filter->ids);
+                // $select = DB::select(
+                //     "SELECT `subject_fk`, `profile_fk`
+                //      FROM `selection`
+                //      LEFT JOIN `competence` ON `competence`.`id` = `selection`.`competence_fk`
+                //      WHERE `selection`.`value` = 1 AND ({$sql})
+                //      GROUP BY `subject_fk`, `profile_fk`
+                //      ORDER BY `subject_fk`, `profile_fk`, `page`
+                //      "
+                // );
 
-                // dd($sql);
-                $select = DB::select(
-                    "SELECT `subject_fk`, `profile_fk`
-                     FROM `selection`
-                     LEFT JOIN `competence` ON `competence`.`id` = `selection`.`competence_fk`
-                     WHERE `selection`.`value` = 1 AND ({$sql})
-                     GROUP BY `subject_fk`, `profile_fk`
-                     ORDER BY `subject_fk`, `profile_fk`, `page`
-                     "
-                );
+                $idf = [];
+                $c = 0;
+                foreach($filter->ids as $id) {
+                    $select = DB::select(
+                            "SELECT `subject_fk`, `profile_fk`
+                             FROM `selection`
+                             WHERE `selection`.`value` = 1 AND `selection`.`competence_fk` = ?
+                             GROUP BY `subject_fk`, `profile_fk`
+                             ORDER BY `subject_fk`, `profile_fk`
+                            ", [ $id ]);
+
+                    if ($c == 0) {
+                        foreach ($select as $kv) {
+                            array_push($idf, $kv->subject_fk.'!'.$kv->profile_fk);
+                        }
+                    }
+                    else {
+                        $temp = [];
+                        foreach ($select as $kv) {
+                            array_push($temp, $kv->subject_fk.'!'.$kv->profile_fk);
+                        }
+                        $idf = array_intersect_assoc($idf, $temp);
+                    }
+                    $c++;
+                }
             }
             // query for min
             else {
@@ -244,7 +269,7 @@ class SelectionController extends Controller
                 );
             }
 
-            $xxx = [];
+            
 
             // add ids list
             foreach ($select as $xs) {
@@ -252,11 +277,13 @@ class SelectionController extends Controller
             }
 
             if ($counter == 0) {
-                $data = $xxx;
+                if (isset($idf)) $data = $idf;
+                else { $data = $xxx; }
             }
 
             if ($counter > 0) {
-                $data = array_intersect_assoc($data, $xxx);
+                if (isset($idf)) { $data = array_intersect_assoc($data, $idf); }
+                else {$data = array_intersect_assoc($data, $xxx); }
             }
 
             $counter++;
