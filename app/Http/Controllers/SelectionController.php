@@ -269,7 +269,7 @@ class SelectionController extends Controller
                 );
             }
 
-            
+            $xxx = [];
 
             // add ids list
             foreach ($select as $xs) {
