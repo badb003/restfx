@@ -209,25 +209,10 @@ class SelectionController extends Controller
             if (!isset($filter->min) && !isset($filter->ids)) {  return response()->json(['filter' => 'filter missing ids or min']); }
             
             $xxx = [];
-
             if (isset($idf)) { unset($idf); }
 
             // query for ids
             if (isset($filter->ids) && count($filter->ids) > 0) {
-                // $sql = 'competence_fk = ';
-
-                // $sql .= implode(" OR competence_fk = ", $filter->ids);
-
-                // $select = DB::select(
-                //     "SELECT `subject_fk`, `profile_fk`
-                //      FROM `selection`
-                //      LEFT JOIN `competence` ON `competence`.`id` = `selection`.`competence_fk`
-                //      WHERE `selection`.`value` = 1 AND ({$sql})
-                //      GROUP BY `subject_fk`, `profile_fk`
-                //      ORDER BY `subject_fk`, `profile_fk`, `page`
-                //      "
-                // );
-
                 $idf = [];
                 $c = 0;
                 foreach($filter->ids as $id) {
@@ -249,11 +234,14 @@ class SelectionController extends Controller
                         foreach ($select as $kv) {
                             array_push($temp, $kv->subject_fk.'!'.$kv->profile_fk);
                         }
-                        $idf = array_intersect_assoc($idf, $temp);
+                        $idf = array_intersect($idf, $temp);
                     }
                     $c++;
+                    
                 }
+                
             }
+            
             // query for min
             else {
                 $select = DB::select(
@@ -267,13 +255,10 @@ class SelectionController extends Controller
                     ",
                     [ $filter->page, $filter->min ]
                 );
-            }
 
-            $xxx = [];
-
-            // add ids list
-            foreach ($select as $xs) {
-                array_push($xxx, $xs->subject_fk.'!'.$xs->profile_fk);
+                foreach ($select as $xs) {
+                    array_push($xxx, $xs->subject_fk.'!'.$xs->profile_fk);
+                }
             }
 
             if ($counter == 0) {
@@ -282,10 +267,9 @@ class SelectionController extends Controller
             }
 
             if ($counter > 0) {
-                if (isset($idf)) { $data = array_intersect_assoc($data, $idf); }
-                else {$data = array_intersect_assoc($data, $xxx); }
+                if (isset($idf)) { $data = array_intersect($data, $idf); }
+                else {$data = array_intersect($data, $xxx); }
             }
-
             $counter++;
         }
 
