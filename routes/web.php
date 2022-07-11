@@ -18,7 +18,7 @@ $router->group([
 ], function ($router) {
     // basic
     $router->post('login', 'AuthController@login');
-    $router->post('register', 'AuthController@register');
+    
 });
 
 $router->group([
@@ -26,6 +26,8 @@ $router->group([
         'middleware' => 'auth'
 ], function ($router) {
     // manage
+    $router->post('register', 'AuthController@register');
+    
     $router->get('profile', 'ProfileController@getProfiles');
     $router->post('profile', 'ProfileController@create');
     $router->delete('profile', 'ProfileController@delete');
