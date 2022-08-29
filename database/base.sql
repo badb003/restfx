@@ -2,6 +2,9 @@
 -- GRANT ALL PRIVILEGES ON *.* TO 'restfx'@'localhost';
 -- FLUSH PRIVILEGES;
 
+-- ALTER TABLE `restfx`.`selection` MODIFY COLUMN subject_fk VARCHAR(191) NOT NULL;
+
+
 DROP DATABASE IF EXISTS `restfx`;
 CREATE DATABASE `restfx` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
 
@@ -48,7 +51,7 @@ ENGINE = InnoDB;
 
 DROP TABLE IF EXISTS `restfx`.`selection`;
 CREATE TABLE IF NOT EXISTS `restfx`.`selection` (
-  `subject_fk` INT NOT NULL,
+  `subject_fk` VARCHAR(191) NOT NULL,
   `profile_fk` INT NOT NULL,
   `competence_fk` INT NOT NULL,
   `value` TINYINT NULL,
