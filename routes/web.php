@@ -46,7 +46,8 @@ $router->group([
     $router->get('allselected', 'SelectionController@getAllPages');
 
     $router->post('filter', 'SelectionController@filter');
-    
+    $router->post('allselectedfilterf', 'SelectionController@getAllSelectionProfilesById');
+
 
     // template page
     $router->get('templatepage', 'SelectionController@templatePage');

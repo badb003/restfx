@@ -297,4 +297,42 @@ class SelectionController extends Controller
 
         return response()->json($rdata);
     }
+
+    
+    public function getAllSelectionProfilesById(Request $request) {
+        $subject_fk = $request->input('subject_fk');
+
+        if (!$subject_fk) {
+            return response()->json(['error' => 'missing subject_fk']);
+        }
+
+        $profiles = Profile::all();
+
+        $res = [];
+
+        foreach ($profiles as $profile) {
+            $listIds = DB::select(
+                "SELECT `id`
+                 FROM `competence`
+                 LEFT JOIN selection ON selection.competence_fk = competence.id
+                 WHERE `value` = 1 AND `subject_fk` = ? AND `profile_fk` = ?
+                 ORDER BY `page`",
+                 [ $subject_fk, $profile->id ]
+            );
+
+            $idlist = [];
+            foreach ($listIds as $idl) {
+                array_push($idlist, $idl->id);
+            }
+
+            if (count($idlist) == 0) continue;
+
+            $record = ['subject_fk' => $subject_fk, 'profile_fk' => $profile->id, 'ids' => $idlist];
+
+            array_push($res, $record);
+        }
+
+        return response()->json($res);
+    }
+    
 }
